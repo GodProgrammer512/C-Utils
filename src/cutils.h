@@ -25,14 +25,14 @@
 #endif
 
 // Clear terminal function:
-extern void clear_terminal(void)
+static void clear_terminal(void)
 {
 	fputs("\033[2J\033[H", stdout);
 	fflush(stdout);
 }
 
 // Pause function:
-extern void petc(void)
+static void petc(void)
 {
 	int characters;
 	while((characters = getchar()) != '\n' && characters != EOF);
@@ -40,7 +40,7 @@ extern void petc(void)
 	getchar();
 }
 
-extern unsigned char verify_os_u(void)
+static unsigned char verify_os_u(void)
 {
 	#ifdef _WIN32 || _WIN64 // For Windows.
 		return 1u;
@@ -51,7 +51,7 @@ extern unsigned char verify_os_u(void)
 	#endif
 }
 
-extern signed char verify_os(void)
+static signed char verify_os(void)
 {
 	#ifdef _WIN32 || _WIN64 // For Windows.
 		return 1;
