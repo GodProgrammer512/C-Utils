@@ -1,6 +1,5 @@
-// Run once:
-#ifndef CUTILS_H
-#define CUTILS_H
+#ifndef _CUTILS_H_
+#define _CUTILS_H_
 
 // Importations:
 #include <stdio.h>
@@ -20,9 +19,9 @@
 #define CYAN_COLOR "\033[36m"
 
 // Math variables:
-#ifdef M_PI
+#ifdef _MATH_H_
 #define M_PI_L 3.1415926535897932385L
-#define M_PI_L_100D 3.14159265358979323846264338327950288419716939937510L
+#define M_PI_L_100N 3.14159265358979323846264338327950288419716939937510L
 #endif
 
 // Clear terminal function:
