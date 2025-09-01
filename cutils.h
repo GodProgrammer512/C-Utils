@@ -56,6 +56,49 @@ extern "C"
 	}
 #endif
 
+// Encoding utils:
+static inline void enable_vt_and_utf8(void)
+{
+	#if defined(_WIN32) || defined(_WIN64) // For Windows.
+		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+		if(hOut == INVALID_HANDLE_VALUE)
+		{
+			return;
+		}
+		DWORD mode = 0;
+		if(!GetConsoleMode(hOut, &mode))
+		{
+			return;
+		}
+		mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		if(!SetConsoleMode(hOut, mode))
+		{
+			DWORD err = GetLastError();
+			(void)err;
+			return;
+		}
+	
+		if(!SetConsoleOutputCP(CP_UTF8))
+		{
+			DWORD err = GetLastError();
+			(void)err;
+		}
+	
+		HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+		if(hIn != INVALID_HANDLE_VALUE)
+		{
+			DWORD inMode = 0;
+			if(GetConsoleMode(hIn, &inMode))
+			{
+				inMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
+				SetConsoleMode(hIn, inMode);
+			}
+		}
+	#elif defined(__linux__) // For Linux.
+		return;
+	#endif
+}
+
 // Clear terminal function:
 static inline void clear_terminal(void)
 {
@@ -75,7 +118,6 @@ static inline void petc(void)
 // Alternative pause function (without pausing, just saying to press "ENTER"):
 static inline void petc_a(void)
 {
-	signed int characters; // Variable to store characters.
 	fputs("Press \"ENTER\" to continue...", stdout);
 	getchar();
 }
@@ -147,6 +189,25 @@ static inline void rrmf(void)
 		puts("When you enter press \"q\" to quit, \"enter\" to go down to the next line, \"space\" to go down next page, and type \"/ + text\" to search for text!");
 		petc();
 		system("less \"./README.md\"");
+	#endif
+}
+
+// Open URL function:
+static inline void url_openner(const char *url)
+{
+	if(url == NULL)
+	{
+		return;
+	}
+
+	#if defined(_WIN32) || defined(_WIN64) // For Windows.
+		char command[256]; // Command variable.
+		snprintf(command, sizeof(command), "start %s", url);
+		system(command);
+	#elif defined(__linux__) // For Linux.
+		char command[256]; // Command variable.
+		snprintf(command, sizeof(command), "xdg-open %s", url);
+		system(command);
 	#endif
 }
 
