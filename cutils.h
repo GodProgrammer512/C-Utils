@@ -18,19 +18,21 @@ extern "C"
 #endif
 
 // Terminal colors:
-#define BASE_TERMINAL      "\033[m"        // Reset terminal text.
-#define BOLD               "\033[1m"       // Bold terminal text.
-#define BASE_TERMINAL_BOLD "\033[m\033[1m" // Reset and bold terminal text.
-#define ITALIC             "\033[3m"       // Italic terminal text.
-#define UNDERLINE          "\033[4m"       // Underline terminal text.
-#define BLACK_COLOR        "\033[30m"      // Black terminal text.
-#define RED_COLOR          "\033[31m"      // Red terminal text.
-#define GREEN_COLOR        "\033[32m"      // Green terminal text.
-#define YELLOW_COLOR       "\033[33m"      // Yellow terminal text.
-#define BLUE_COLOR         "\033[34m"      // Blue terminal text.
-#define MAGENTA_COLOR      "\033[35m"      // Magenta terminal text.
-#define CYAN_COLOR         "\033[36m"      // Cyan terminal text.
-#define WHITE_COLOR        "\033[37m"      // White terminal text.
+#ifdef IMPORT_TEMINAL_COLORS
+	#define BASE_TERMINAL      "\033[m"        // Reset terminal text.
+	#define BOLD               "\033[1m"       // Bold terminal text.
+	#define BASE_TERMINAL_BOLD "\033[m\033[1m" // Reset and bold terminal text.
+	#define ITALIC             "\033[3m"       // Italic terminal text.
+	#define UNDERLINE          "\033[4m"       // Underline terminal text.
+	#define BLACK_COLOR        "\033[30m"      // Black terminal text.
+	#define RED_COLOR          "\033[31m"      // Red terminal text.
+	#define GREEN_COLOR        "\033[32m"      // Green terminal text.
+	#define YELLOW_COLOR       "\033[33m"      // Yellow terminal text.
+	#define BLUE_COLOR         "\033[34m"      // Blue terminal text.
+	#define MAGENTA_COLOR      "\033[35m"      // Magenta terminal text.
+	#define CYAN_COLOR         "\033[36m"      // Cyan terminal text.
+	#define WHITE_COLOR        "\033[37m"      // White terminal text.
+#endif
 
 // Math utils:
 #ifdef IMPORT_MATH_UTILS
@@ -215,7 +217,7 @@ static inline void url_openner(const char *url)
 static inline void easter_egg_function(void)
 {
 	// Basic commands:
-	printf("%sCongratulations!!!%s You just discovered a new easter egg! (please don't say it to anywhone ok!)\n", BOLD, BASE_TERMINAL);
+	puts("Congratulations!!! You just discovered a new easter egg! (please don't say it to anywhone ok!)");
 	puts("This is the link to our github account! If you want to see our projects, codes, etc...");
 	puts("Link: https://github.com/GodProgrammer512/");
 
