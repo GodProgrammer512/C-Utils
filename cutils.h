@@ -21,10 +21,20 @@
 /* Importations: */
 #include <stdio.h>
 #include <stdlib.h>
+
 #if defined(_WIN32) || defined(_WIN64) /* For Windows. */
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
+	#include <direct.h>
+	#define MKDIR(dir) _mkdir(dir)
 #elif defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__) || defined(__DJGPP__) /* For Linux, Android, Apple and MS-DOS. */
+	#include <unistd.h>
+	#include <time.h>
+	#include <errno.h>
+	#include <sys/stat.h>
+	#include <sys/types.h>
+	#define MKDIR(dir) mkdir(dir, 0755)
+#elif defined(__DJGPP__) /* For MS-DOS. */
 	#include <unistd.h>
 	#include <time.h>
 	#include <errno.h>
@@ -37,9 +47,9 @@ extern "C"
 #endif
 
 /* C Utils version variables: */
-#define CUTILS_FULL_VERSION                 140L            /* C Utils full version variable (1.4.0).           */
+#define CUTILS_FULL_VERSION                 150L            /* C Utils full version variable (1.5.0).           */
 #define CUTILS_MAJOR_VERSION                1L              /* C Utils major version variable (1).              */
-#define CUTILS_MINOR_VERSION                4L              /* C Utils minor version variable (4).              */
+#define CUTILS_MINOR_VERSION                5L              /* C Utils minor version variable (5).              */
 #define CUTILS_PATCH_VERSION                0L              /* C Utils patch version variable (0).              */
 
 /* Terminal colors: */
@@ -59,21 +69,21 @@ extern "C"
 
 /* Precision variables: */
 #define MINIMUM_RECOMMENDED_PRECISION_VALUE 0               /* Minimum recommended precision value variable.    */
-#define MAXIMUM_RECOMMENDED_PRECISION_VALUE 16              /* Maximum recommended precision value variable.    */
+#define MAXIMUM_RECOMMENDED_PRECISION_VALUE 18              /* Maximum recommended precision value variable.    */
+
+/* Temperature limits variables: */
+#define MIN_CELSIUS_F                      -273.15f         /* Minimum Celsius temperature (in float).          */
+#define MIN_CELSIUS_D                      -273.15          /* Minimum Celsius temperature (in double).         */
+#define MIN_CELSIUS_L                      -273.15L         /* Minimum Celsius temperature (in long double).    */
+#define MIN_FAHRENHEIT_F                   -459.67f         /* Minimum Fahrenheit temperature (in float).       */
+#define MIN_FAHRENHEIT_D                   -459.67          /* Minimum Fahrenheit temperature (in double).      */
+#define MIN_FAHRENHEIT_L                   -459.67L         /* Minimum Fahrenheit temperature (in long double). */
+#define MIN_KELVIN_F                        0.0f            /* Minimum Kelvin temperature (in float).           */
+#define MIN_KELVIN_D                        0.0             /* Minimum Kelvin temperature (in double).          */
+#define MIN_KELVIN_L                        0.0L            /* Minimum Kelvin temperature (in long double).     */
 
 /* Math utils: */
 #ifdef IMPORT_MATH_UTILS
-
-	/* Math variables: */
-	#define MIN_CELSIUS_F                    -273.15f         /* Minimum Celsius temperature (in float).          */
-	#define MIN_CELSIUS_D                    -273.15          /* Minimum Celsius temperature (in double).         */
-	#define MIN_CELSIUS_L                    -273.15L         /* Minimum Celsius temperature (in long double).    */
-	#define MIN_FAHRENHEIT_F                 -459.67f         /* Minimum Fahrenheit temperature (in float).       */
-	#define MIN_FAHRENHEIT_D                 -459.67          /* Minimum Fahrenheit temperature (in double).      */
-	#define MIN_FAHRENHEIT_L                 -459.67L         /* Minimum Fahrenheit temperature (in long double). */
-	#define MIN_KELVIN_F                      0.0f            /* Minimum Kelvin temperature (in float).           */
-	#define MIN_KELVIN_D                      0.0             /* Minimum Kelvin temperature (in double).          */
-	#define MIN_KELVIN_L                      0.0L            /* Minimum Kelvin temperature (in long double).     */
 
 	/* Functions to calculate the circumference: */
 	#define CIRCUMFER_F(pi_val_float) ((float)(2.0f) * (float)(pi_val_) * (float)(radius_val_))                                                 /* Float version.       */
@@ -176,7 +186,7 @@ static void enable_vt_and_utf8()
 /* Pause function: */
 static void petc()
 {
-	signed int characters; /* Variable to store characters. */
+	int characters = 0; /* Variable to store characters. */
 	while((characters = getchar()) != EOF && characters != '\n');
 	fputs("Press \"ENTER\" to continue...", stdout);
 	getchar();
@@ -194,13 +204,15 @@ static char verify_os()
 {
 	#if defined(_WIN32) || defined(_WIN64) /* For Windows. */
 		return 1;
-	#elif defined(__linux__) || defined(__ANDROID__) /* For Linux and Android. */
+	#elif defined(__linux__)               /* For Linux. */
 		return 2;
-	#elif defined(__APPLE__) /* For macOS. */
-		return 3;
-	#elif defined(__DJGPP__) /* For MS-DOS. */
+	#elif defined(__ANDROID__)             /* For Android. */
+		return 3
+	#elif defined(__APPLE__)               /* For macOS. */
 		return 4;
-	#else /* For another OS. */
+	#elif defined(__DJGPP__)               /* For MS-DOS. */
+		return 5;
+	#else                                  /* For another OS. */
 		return 0;
 	#endif
 }
@@ -279,15 +291,15 @@ static void rrmf()
 	#if defined(_WIN32) || defined(_WIN64) /* For Windows. */
 		puts("When you enter just press \"space\" to advance 1 page, \"enter\" to go down 1 line and \"Ctrl-C\" to quit \"READ-ME\"!");
 		petc();
-		system("more /E /C /P \".\\README.md\"");
+		system("more /C /P README.md");
 		petc_a();
 		CLEAR_TERMINAL();
 	#elif defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__) /* For Linux, Android and macOS. */
 		puts("When you enter press \"q\" to quit, \"enter\" to go down to the next line, \"space\" to go down next page, and type \"/ + text\" to search for text!");
 		petc();
-		system("less \"./README.md\"");
+		system("more -cp README.md");
 	#elif defined(__DJGPP__) /* For MS-DOS. */
-		system("type \".\\README.MD\"");
+		system("TYPE README.MD");
 	#endif
 }
 
@@ -300,15 +312,15 @@ static void url_openner(const char *url)
 	}
 
 	#if defined(_WIN32) || defined(_WIN64) /* For Windows. */
-		char command[4096]; /* Command variable. */
+		char command[4096] = ""; /* Command variable. */
 		snprintf(command, sizeof(command), "start %s", url);
 		system(command);
 	#elif defined(__linux__) || defined(__ANDROID__) /* For Linux and Android. */
-		char command[4096]; /* Command variable. */
+		char command[4096] = ""; /* Command variable. */
 		snprintf(command, sizeof(command), "xdg-open %s", url);
 		system(command);
 	#elif defined(__APPLE__) /* For macOS. */
-		char command[4096]; /* Command variable. */
+		char command[4096] = ""; /* Command variable. */
 		snprintf(command, sizeof(command), "open %s", url);
 		system(command);
 	#elif defined(__DJGPP__) /* For MS-DOS. */
@@ -322,15 +334,15 @@ static void easter_egg_function()
 	/* Basic commands: */
 	puts("Congratulations!!! You just discovered a new easter egg! (please don't say it to anywhone ok!)");
 	puts("This is the link to our github account! If you want to see our projects, codes, etc...");
-	puts("Link: \"https://github.com/GodProgrammer512/\"");
+	puts("Link: https://github.com/GodProgrammer512/");
 
 	/* Command to open the link on browser: */
 	#if defined(_WIN32) || defined(_WIN64) /* For Windows. */
-	  system("start \"https://github.com/GodProgrammer512/\"");
+	  system("start https://github.com/GodProgrammer512/");
 	#elif defined(__linux__) || defined(__ANDROID__) /* For Linux and Android. */
-	  system("xdg-open \"https://github.com/GodProgrammer512/\"");
+	  system("xdg-open https://github.com/GodProgrammer512/");
 	#elif defined(__APPLE__) /* For macOS. */
-	  system("open \"https://github.com/GodProgrammer512/\"");
+	  system("open https://github.com/GodProgrammer512/");
 	#endif
 
 	/* Pause APP: */
