@@ -68,8 +68,8 @@ extern "C"
 #define WHITE_COLOR                         "\033[37m"      /* White terminal text.                             */
 
 /* Precision variables: */
-#define MINIMUM_RECOMMENDED_PRECISION_VALUE 0               /* Minimum recommended precision value variable.    */
-#define MAXIMUM_RECOMMENDED_PRECISION_VALUE 18              /* Maximum recommended precision value variable.    */
+#define MIN_RPV 0                                           /* Minimum recommended precision value variable.    */
+#define MAX_RPV 18                                          /* Maximum recommended precision value variable.    */
 
 /* Temperature limits variables: */
 #define MIN_CELSIUS_F                      -273.15f         /* Minimum Celsius temperature (in float).          */
