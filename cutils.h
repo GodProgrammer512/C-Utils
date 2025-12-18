@@ -306,25 +306,28 @@ static void rrmf()
 /* Open URL function: */
 static void url_openner(const char *url)
 {
-	if(url == NULL)
-	{
+	#if defined(__DJGPP__) /* For MS-DOS. */
 		return;
-	}
+	#else /* For another OS. */
+		if(url == NULL)
+		{
+			return;
+		}
 
-	#if defined(_WIN32) || defined(_WIN64) /* For Windows. */
-		char command[4096] = ""; /* Command variable. */
-		snprintf(command, sizeof(command), "start %s", url);
-		system(command);
-	#elif defined(__linux__) || defined(__ANDROID__) /* For Linux and Android. */
-		char command[4096] = ""; /* Command variable. */
-		snprintf(command, sizeof(command), "xdg-open %s", url);
-		system(command);
-	#elif defined(__APPLE__) /* For macOS. */
-		char command[4096] = ""; /* Command variable. */
-		snprintf(command, sizeof(command), "open %s", url);
-		system(command);
-	#elif defined(__DJGPP__) /* For MS-DOS. */
-		return;
+		else
+		{
+			char command[16384] = ""; /* Command variable. */
+
+			#if defined(_WIN32) || defined(_WIN64) /* For Windows. */
+				snprintf(command, sizeof(command), "start %s", url);
+			#elif defined(__linux__) || defined(__ANDROID__) /* For Linux and Android. */
+				snprintf(command, sizeof(command), "xdg-open %s", url);
+			#elif defined(__APPLE__) /* For macOS. */
+				snprintf(command, sizeof(command), "open %s", url);
+			#endif
+
+			system(command);
+		}
 	#endif
 }
 
