@@ -183,7 +183,7 @@ static void enable_vt_and_utf8()
 /* Clear terminal function: */
 #define CLEAR_TERMINAL() (fputs("\033[2J\033[3J\033[H", stdout))
 
-/* Pause function: */
+/* Press enter to continue function: */
 static void petc()
 {
 	int characters = 0; /* Variable to store characters. */
@@ -192,8 +192,8 @@ static void petc()
 	getchar();
 }
 
-/* Alternative pause function (without pausing, just saying to press "ENTER"): */
-static void petc_a()
+/* Alternative press enter to continue function (without pausing, just saying to press "ENTER"): */
+static void apetc()
 {
 	fputs("Press \"ENTER\" to continue...", stdout);
 	getchar();
